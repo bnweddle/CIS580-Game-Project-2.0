@@ -14,6 +14,30 @@ using System.Threading.Tasks;
 namespace DeathOrDodge
 {
     /// <summary>
+    /// An enumeration of possible player animation states
+    /// </summary>
+    enum PlayerAnimState
+    {
+        Idle,
+        JumpingLeft,
+        JumpingRight,
+        WalkingLeft,
+        WalkingRight,
+        FallingLeft,
+        FallingRight
+    }
+
+    /// <summary>
+    /// An enumeration of possible player veritcal movement states
+    /// </summary>
+    enum VerticalMovementState
+    {
+        OnGround,
+        Jumping,
+        DoubleJumping,
+        Falling
+    }
+    /// <summary>
     /// For which direction the player is facing
     /// </summary>
     public enum State
@@ -28,24 +52,36 @@ namespace DeathOrDodge
     public class Player
     {
         // how much the animation moves per frames 
-        const int ANIMATION_FRAME_RATE = 124;
+        const int FRAME_RATE = 124;
+        // The duration of a player's jump, in milliseconds
+        const int JUMP_TIME = 500;
         // the speed of the player
-        const float PLAYER_SPEED = 200;
+        const float PLAYER_SPEED = 100;
         // width of animation frames
         public const int FRAME_WIDTH = 67;
         // height of animation frames
         const int FRAME_HEIGHT = 100;
+        // The currently rendered frame
+        int currentFrame = 0;
+        // The player's animation state
+        PlayerAnimState animationState;
+        // The player's vertical movement state
+        VerticalMovementState verticalState;
+        // A timer for jumping
+        TimeSpan jumpTimer;
+        // A timer for animations
+        TimeSpan animationTimer;
+        // The origin of the sprite (centered on its feet)
+        Vector2 Origin = new Vector2(10, 21);
 
 
         Game1 game;
         Texture2D player;
         State state;
-        TimeSpan timer;
-        public Vector2 position;
+        public Vector2 Position;
         public BoundingRectangle Bounds;
         KeyboardState oldState;
         int frame;
-
 
         public Player(Game1 game)
         {
@@ -54,9 +90,10 @@ namespace DeathOrDodge
 
         public void Initialize()
         {
-            timer = new TimeSpan(0);
-            position = new Vector2(200, 200);
+            Position = new Vector2(200, 500);
             state = State.Idle;
+            animationState = PlayerAnimState.Idle;
+            verticalState = VerticalMovementState.OnGround;
             Bounds.Width = FRAME_WIDTH;
             Bounds.Height = FRAME_HEIGHT;
         }
@@ -69,66 +106,140 @@ namespace DeathOrDodge
         public void Update(GameTime gameTime)
         {
             //Movement
-            KeyboardState newState = Keyboard.GetState();
+            KeyboardState keyboard = Keyboard.GetState();
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            Bounds.X = position.X;
-            Bounds.Y = position.Y;
+            Bounds.X = Position.X;
+            Bounds.Y = Position.Y;
 
-            if (newState.IsKeyDown(Keys.Up))
+            // Vertical movement
+            switch (verticalState)
             {
-                state = State.North;
-                position.Y -= delta * PLAYER_SPEED;
+                case VerticalMovementState.OnGround:
+                    if (keyboard.IsKeyDown(Keys.Up))
+                    {
+                        verticalState = VerticalMovementState.Jumping;
+                        jumpTimer = new TimeSpan(0);
+                    }
+                    break;
+                case VerticalMovementState.Jumping:
+                    jumpTimer += gameTime.ElapsedGameTime;
+                    // Simple jumping with platformer physics
+                    Position.Y -= (350 / (float)jumpTimer.TotalMilliseconds);
+                    if (jumpTimer.TotalMilliseconds >= JUMP_TIME)
+                        verticalState = VerticalMovementState.Falling;
+                    break;
+                case VerticalMovementState.Falling:
+                    Position.Y += delta * PLAYER_SPEED;
+                    // TODO: This needs to be replaced with collision logic
+                    if (Position.Y > 500)
+                    {
+                        Position.Y = 500;
+                        verticalState = VerticalMovementState.OnGround;
+                    }
+                    break;
             }
-            else if (newState.IsKeyDown(Keys.Left))
+
+
+            // Horizontal movement
+            if (keyboard.IsKeyDown(Keys.Left))
             {
-                state = State.West;
-                position.X -= delta * PLAYER_SPEED;
+                if (verticalState == VerticalMovementState.Jumping || verticalState == VerticalMovementState.Falling)
+                    animationState = PlayerAnimState.JumpingLeft;
+                else
+                {
+                    state = State.West;
+                    animationState = PlayerAnimState.WalkingLeft;
+                }
+                Position.X -= delta * PLAYER_SPEED;
             }
-            else if (newState.IsKeyDown(Keys.Right))
+            else if (keyboard.IsKeyDown(Keys.Right))
             {
-                state = State.East;
-                position.X += delta * PLAYER_SPEED;
+                if (verticalState == VerticalMovementState.Jumping || verticalState == VerticalMovementState.Falling)
+                    animationState = PlayerAnimState.JumpingRight;
+                else
+                {
+                    state = State.East;
+                    animationState = PlayerAnimState.WalkingRight;
+                }
+                Position.X += delta * PLAYER_SPEED;
             }
-            else if (newState.IsKeyDown(Keys.Down))
+            else
             {
-                state = State.South;
-                position.Y += delta * PLAYER_SPEED;
+                state = State.Idle;
+                animationState = PlayerAnimState.Idle;
             }
-            else state = State.Idle;
+
+            // Apply animations
+            switch (animationState)
+            {
+                case PlayerAnimState.Idle:
+                    currentFrame = 0;
+                    animationTimer = new TimeSpan(0);
+                    break;
+
+                case PlayerAnimState.JumpingLeft:
+                    currentFrame = 7;
+                    break;
+
+                case PlayerAnimState.JumpingRight:
+                    currentFrame = 7;
+                    break;
+
+                case PlayerAnimState.WalkingLeft:
+                    animationTimer += gameTime.ElapsedGameTime;
+                    // Walking frames are 9 & 10
+                    if (animationTimer.TotalMilliseconds > FRAME_RATE * 2)
+                    {
+                        animationTimer = new TimeSpan(0);
+                    }
+                    currentFrame = (int)Math.Floor(animationTimer.TotalMilliseconds / FRAME_RATE) + 9;
+                    break;
+
+                case PlayerAnimState.WalkingRight:
+                    animationTimer += gameTime.ElapsedGameTime;
+                    // Walking frames are 9 & 10
+                    if (animationTimer.TotalMilliseconds > FRAME_RATE * 2)
+                    {
+                        animationTimer = new TimeSpan(0);
+                    }
+                    currentFrame = (int)Math.Floor(animationTimer.TotalMilliseconds / FRAME_RATE) + 9;
+                    break;
+
+            }
 
             // Making sure player doesn't go off screen
-            if (position.Y < 0)
+            if (Position.Y < 0)
             {
-                position.Y = 0;
+                Position.Y = 0;
             }
-            if (position.X < 0)
+            if (Position.X < 0)
             {
-                position.X = 0;
+                Position.X = 0;
             }
-            if (position.Y > game.GraphicsDevice.Viewport.Height - FRAME_HEIGHT)
+            if (Position.Y > game.GraphicsDevice.Viewport.Height - FRAME_HEIGHT)
             {
-                position.Y = game.GraphicsDevice.Viewport.Height - FRAME_HEIGHT;
+                Position.Y = game.GraphicsDevice.Viewport.Height - FRAME_HEIGHT;
             }
-            if (position.X > game.GraphicsDevice.Viewport.Width - FRAME_WIDTH)
+            if (Position.X > game.GraphicsDevice.Viewport.Width - FRAME_WIDTH)
             {
-                position.X = game.GraphicsDevice.Viewport.Width - FRAME_WIDTH;
+                Position.X = game.GraphicsDevice.Viewport.Width - FRAME_WIDTH;
             }
 
             // update animation timer when the player is moving
-            if (state != State.Idle)
-                timer += gameTime.ElapsedGameTime;
+            if (animationState != PlayerAnimState.Idle)
+                animationTimer += gameTime.ElapsedGameTime;
 
             // Check if animation should increase by more than one frame
-            while (timer.TotalMilliseconds > ANIMATION_FRAME_RATE)
+            while (animationTimer.TotalMilliseconds > FRAME_RATE)
             {
                 // increase frame
                 frame++;
                 // Decrease the timer by one frame duration
-                timer -= new TimeSpan(0, 0, 0, 0, ANIMATION_FRAME_RATE);
+                animationTimer -= new TimeSpan(0, 0, 0, 0, FRAME_RATE);
             }
 
             frame %= 4;
-            oldState = newState;
+            oldState = keyboard;
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -141,7 +252,7 @@ namespace DeathOrDodge
                 FRAME_HEIGHT
                 );
 
-            spriteBatch.Draw(player, position, rectSource, Color.White);
+            spriteBatch.Draw(player, Position, rectSource, Color.White);
 
         }
 
