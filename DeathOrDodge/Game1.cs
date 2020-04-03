@@ -17,7 +17,6 @@ namespace DeathOrDodge
         SpriteFont font;
 
         Player player;
-        Player heart;
         List<Bush> bushes = new List<Bush>();
 
         // To see if Mute/Spacebar was pressed 
@@ -44,8 +43,6 @@ namespace DeathOrDodge
 
 
         ParallaxLayer playerLayer;
-        ParallaxLayer groundLayer;
-        ParallaxLayer mountainsLayer;
         ParallaxLayer backgroundLayer;
         ParallaxLayer bushLayer;
 
