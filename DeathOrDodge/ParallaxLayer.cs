@@ -10,7 +10,11 @@ namespace DeathOrDodge
 {
     public class ParallaxLayer : DrawableGameComponent
     {
-       
+        /// <summary>
+        /// The controller for this scroll layer
+        /// </summary>
+        public IScrollController ScrollController { get; set; } = new AutoScrollController();
+
         /// <summary>
         /// The list of ISprites that compose this parallax layer
         /// </summary>
@@ -35,6 +39,14 @@ namespace DeathOrDodge
             spriteBatch = new SpriteBatch(game.GraphicsDevice);
         }
 
+        /// <summary>
+        /// Updates the ParallaxLayer
+        /// </summary>
+        /// <param name="gameTime">the GameTime object</param>
+        public override void Update(GameTime gameTime)
+        {
+            ScrollController.Update(gameTime);
+        }
 
         /// <summary>
         /// Draws the Parallax layer
@@ -42,7 +54,7 @@ namespace DeathOrDodge
         /// <param name="gameTime">The GameTime object</param>
         public override void Draw(GameTime gameTime)
         {
-            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, transform);
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, ScrollController.Transform);
             foreach (var sprite in Sprites)
             {
                 sprite.Draw(spriteBatch, gameTime);

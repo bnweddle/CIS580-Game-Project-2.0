@@ -94,7 +94,7 @@ namespace DeathOrDodge
             // TODO: use this.Content to load your game content here
 
             var bluesky = Content.Load<Texture2D>("bluesky");
-            var blueskySprite = new StaticSprite(bluesky);
+            var blueskySprite = new StaticSprite(bluesky, 0.75f);
             var backgroundLayer = new ParallaxLayer(this);
             backgroundLayer.Sprites.Add(blueskySprite);
             backgroundLayer.DrawOrder = 0;
@@ -104,7 +104,7 @@ namespace DeathOrDodge
             player.Initialize();
             var playerLayer = new ParallaxLayer(this);
             playerLayer.Sprites.Add(player);
-            playerLayer.DrawOrder = 2;
+            playerLayer.DrawOrder = 3;
             Components.Add(playerLayer);
 
             var bushLayer = new ParallaxLayer(this);
@@ -116,12 +116,33 @@ namespace DeathOrDodge
                 Bush bush = new Bush(this, bushSheet, new Vector2(300 + offset, 543));
                 bushLayer.Sprites.Add(bush);
                 bushes.Add(bush);
-                bushLayer.DrawOrder = 3;
+                bushLayer.DrawOrder = 4;
                 offset += random.Next(150, 300);
             }
             Components.Add(bushLayer);
 
+            var mountains = Content.Load<Texture2D>("mountains");
+            var ground = Content.Load<Texture2D>("ground");
 
+            var mountainSprite = new StaticSprite(mountains, new Vector2(0, 100), 0.25f);
+            var groundSprite = new StaticSprite(ground, new Vector2(0, 435), 0.25f);
+
+            var groundLayer = new ParallaxLayer(this);
+            var mountainsLayer = new ParallaxLayer(this);
+
+            groundLayer.Sprites.Add(groundSprite);
+            mountainsLayer.Sprites.Add(mountainSprite);
+
+            mountainsLayer.DrawOrder = 1;
+            groundLayer.DrawOrder = 2;
+
+            Components.Add(mountainsLayer);
+            Components.Add(groundLayer);
+
+            mountainsLayer.ScrollController = new PlayerTrackingScrollController(player, 0.4f);
+            playerLayer.ScrollController = new PlayerTrackingScrollController(player, 1.0f);
+            groundLayer.ScrollController = new PlayerTrackingScrollController(player, 1.0f);
+            bushLayer.ScrollController = new PlayerTrackingScrollController(player, 1.0f);
 
         }
 
@@ -154,21 +175,22 @@ namespace DeathOrDodge
             }
 
             player.Update(gameTime);
-           // bush.Update(gameTime);
-           
-           /*
-           if (player.Bounds.CollidesWith(bush.Bounds))
-            {
-                lives--;
-                if (lives > 0)
-                    loseLife.Play();
-                else if (lives == 0)
-                {
-                    gameOver.Play();
-                    endGame = true;
-                }
-            }*/
+            // bush.Update(gameTime);
 
+            foreach (Bush b in bushes){
+                if (player.Bounds.CollidesWith(b.Bounds))
+                {
+                    lives--;
+                    if (lives > 0)
+                        loseLife.Play();
+                    else if (lives == 0)
+                    {
+                        gameOver.Play();
+                        endGame = true;
+                    }
+                }
+            }
+         
             oldState = newState;
             base.Update(gameTime);
         }

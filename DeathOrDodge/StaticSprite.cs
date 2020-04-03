@@ -21,11 +21,17 @@ namespace DeathOrDodge
         Texture2D texture;
 
         /// <summary>
+        /// Scaling the Sprite
+        /// </summary>
+        float Scale;
+
+        /// <summary>
         /// Creates a new static sprite
         /// </summary>
         /// <param name="texture">the texture to use</param>
-        public StaticSprite(Texture2D texture)
+        public StaticSprite(Texture2D texture, float scale)
         {
+            this.Scale = scale;
             this.texture = texture;
         }
 
@@ -34,8 +40,9 @@ namespace DeathOrDodge
         /// </summary>
         /// <param name="texture">the texture to use</param>
         /// <param name="position">the upper-left hand corner of the sprite</param>
-        public StaticSprite(Texture2D texture, Vector2 Position)
+        public StaticSprite(Texture2D texture, Vector2 Position, float scale)
         {
+            this.Scale = scale;
             this.texture = texture;
             this.position = Position;
         }
@@ -49,7 +56,7 @@ namespace DeathOrDodge
         /// <param name="gameTime"></param>
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            spriteBatch.Draw(texture, position, Color.White);
+             spriteBatch.Draw(texture, position, null, Color.White, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0);
         }
     }
 }

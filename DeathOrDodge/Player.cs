@@ -92,7 +92,7 @@ namespace DeathOrDodge
 
         public void Initialize()
         {
-            Position = new Vector2(200, 500);
+            Position = new Vector2(240, 500);
             state = State.Idle;
             animationState = PlayerAnimState.Idle;
             verticalState = VerticalMovementState.OnGround;
@@ -202,24 +202,6 @@ namespace DeathOrDodge
                     currentFrame = (int)Math.Floor(animationTimer.TotalMilliseconds / FRAME_RATE) + 9;
                     break;
 
-            }
-
-            // Making sure player doesn't go off screen
-            if (Position.Y < 0)
-            {
-                Position.Y = 0;
-            }
-            if (Position.X < 0)
-            {
-                Position.X = 0;
-            }
-            if (Position.Y > game.GraphicsDevice.Viewport.Height - FRAME_HEIGHT)
-            {
-                Position.Y = game.GraphicsDevice.Viewport.Height - FRAME_HEIGHT;
-            }
-            if (Position.X > game.GraphicsDevice.Viewport.Width - FRAME_WIDTH)
-            {
-                Position.X = game.GraphicsDevice.Viewport.Width - FRAME_WIDTH;
             }
 
             // update animation timer when the player is moving
