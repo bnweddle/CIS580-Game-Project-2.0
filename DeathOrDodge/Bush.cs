@@ -17,6 +17,8 @@ namespace DeathOrDodge
         /// </summary>
         Texture2D bush;
 
+        private Player player;
+
         /// <summary>
         /// The portion of the spritesheet that is the helicopter
         /// </summary>
@@ -38,18 +40,20 @@ namespace DeathOrDodge
         /// </summary>
         Vector2 Position;
 
-
         Game1 game;
 
         /// <summary>
         /// Constructs a bush
         /// </summary>
         /// <param name="spritesheet">The player's spritesheet</param>
-        public Bush(Game1 game, Texture2D texture, Vector2 position)
+        public Bush(Game1 game, Texture2D texture, Vector2 position, Player player)
         {
             this.game = game;
             this.bush = texture;
             this.Position = position;
+            Bounds.X = position.X;
+            Bounds.Y = position.Y;
+            this.player = player;
         }
 
         /// <summary>
@@ -69,12 +73,17 @@ namespace DeathOrDodge
         /// <param name="gameTime">The GameTime object</param>
         public void Update(GameTime gameTime)
         {
-            //check if fallen off screen then reset
-            //layer has update  
-            if (Position.X < 0)
-            {
-                Position.X = 1300;
+           if(player.Position.X - Position.X > 250)
+           {
+                System.Diagnostics.Debug.WriteLine($"moving bush from {Position.X} moving bush to {bush.Bounds.X}");
+
+                Position += new Vector2(3000, 0);
+                Bounds.X = Position.X;
+
+                System.Diagnostics.Debug.WriteLine($"moving bush to {Position.X} moving bush to {bush.Bounds.X}");
+
             }
+
         }
 
         /// <summary>
@@ -83,7 +92,7 @@ namespace DeathOrDodge
         /// <param name="spriteBatch"></param>
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            spriteBatch.Draw(bush, Position, Bounds, Color.White, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0);
+            spriteBatch.Draw(bush, Position, null, Color.White, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0);
         }
 
     }

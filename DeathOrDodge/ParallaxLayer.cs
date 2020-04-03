@@ -46,6 +46,7 @@ namespace DeathOrDodge
         public override void Update(GameTime gameTime)
         {
             ScrollController.Update(gameTime);
+
         }
 
         /// <summary>

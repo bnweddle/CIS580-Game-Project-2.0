@@ -17,6 +17,7 @@ namespace DeathOrDodge
         SpriteFont font;
 
         Player player;
+        Player heart;
         List<Bush> bushes = new List<Bush>();
 
         // To see if Mute/Spacebar was pressed 
@@ -24,8 +25,8 @@ namespace DeathOrDodge
         KeyboardState oldState;
 
         //To keep track of lives and levels
-        Texture2D heart;
         int lives;
+        Texture2D heartTexture;
 
         // Whether the game is over or has started
         bool beginGame;
@@ -40,6 +41,13 @@ namespace DeathOrDodge
         // For background start and end page
         Texture2D backgroundStart;
         Texture2D backgroundEnd;
+
+
+        ParallaxLayer playerLayer;
+        ParallaxLayer groundLayer;
+        ParallaxLayer mountainsLayer;
+        ParallaxLayer backgroundLayer;
+        ParallaxLayer bushLayer;
 
         bool mute = false;
 
@@ -86,7 +94,7 @@ namespace DeathOrDodge
             //foreach random if good spot contine else generate new spot
 
             font = Content.Load<SpriteFont>("DefaultFont");
-            heart = Content.Load<Texture2D>("heart");
+            heartTexture = Content.Load<Texture2D>("heart");
             // The image before starting the game
             backgroundStart = Content.Load<Texture2D>("start");
             backgroundEnd = Content.Load<Texture2D>("end");
@@ -94,46 +102,71 @@ namespace DeathOrDodge
             // TODO: use this.Content to load your game content here
 
             var bluesky = Content.Load<Texture2D>("bluesky");
-            var blueskySprite = new StaticSprite(bluesky, 0.75f);
-            var backgroundLayer = new ParallaxLayer(this);
-            backgroundLayer.Sprites.Add(blueskySprite);
+            var blueskySprites = new StaticSprite[]
+            {
+                    new StaticSprite(bluesky, 1.0f),
+                    new StaticSprite(bluesky, new Vector2(1968, 0), 1.0f)
+            };
+            backgroundLayer = new ParallaxLayer(this);
+            backgroundLayer.Sprites.AddRange(blueskySprites);
             backgroundLayer.DrawOrder = 0;
             Components.Add(backgroundLayer);
 
             player = new Player(this, playerSheet);
             player.Initialize();
-            var playerLayer = new ParallaxLayer(this);
+            playerLayer = new ParallaxLayer(this);
             playerLayer.Sprites.Add(player);
             playerLayer.DrawOrder = 3;
             Components.Add(playerLayer);
 
-            var bushLayer = new ParallaxLayer(this);
+            bushLayer = new ParallaxLayer(this);
 
             float offset = 150;
             for (int i = 0; i < 10; i++)
             {
                
-                Bush bush = new Bush(this, bushSheet, new Vector2(300 + offset, 543));
+                Bush bush = new Bush(this, bushSheet, new Vector2(300 + offset, 543), player);
                 bushLayer.Sprites.Add(bush);
                 bushes.Add(bush);
                 bushLayer.DrawOrder = 4;
                 offset += random.Next(150, 300);
             }
+
             Components.Add(bushLayer);
 
             var mountains = Content.Load<Texture2D>("mountains");
             var ground = Content.Load<Texture2D>("ground");
 
-            var mountainSprite = new StaticSprite(mountains, new Vector2(0, 100), 0.25f);
-            var groundSprite = new StaticSprite(ground, new Vector2(0, 435), 0.25f);
+            var mountainSprites = new List<StaticSprite>();
+            for (int i = 0; i < 4; i++)
+            {
+                var position = new Vector2(i * 1750, 100);
+                var sprite = new StaticSprite(mountains, position, 0.25f);
+                mountainSprites.Add(sprite);
+            }
 
-            var groundLayer = new ParallaxLayer(this);
             var mountainsLayer = new ParallaxLayer(this);
-
-            groundLayer.Sprites.Add(groundSprite);
-            mountainsLayer.Sprites.Add(mountainSprite);
+            foreach (var sprite in mountainSprites)
+            {
+                mountainsLayer.Sprites.Add(sprite);
+            }
 
             mountainsLayer.DrawOrder = 1;
+
+            var groundSprites = new List<StaticSprite>();
+            for (int i = 0; i < 4; i++)
+            {
+                var position = new Vector2(i * 2216, 435);
+                var sprite = new StaticSprite(ground, position, 0.25f);
+                groundSprites.Add(sprite);
+            }
+
+            var groundLayer = new ParallaxLayer(this);
+            foreach (var sprite in groundSprites)
+            {
+                groundLayer.Sprites.Add(sprite);
+            }
+
             groundLayer.DrawOrder = 2;
 
             Components.Add(mountainsLayer);
@@ -175,11 +208,13 @@ namespace DeathOrDodge
             }
 
             player.Update(gameTime);
-            // bush.Update(gameTime);
 
             foreach (Bush b in bushes){
+
+                b.Update(gameTime);
                 if (player.Bounds.CollidesWith(b.Bounds))
                 {
+                    player.Hit();
                     lives--;
                     if (lives > 0)
                         loseLife.Play();
@@ -234,7 +269,7 @@ namespace DeathOrDodge
                 int start = 50;
                 for (int i = 0; i < lives; i++)
                 {
-                    spriteBatch.Draw(heart, new Rectangle(graphics.PreferredBackBufferWidth - start, graphics.PreferredBackBufferHeight - 50, 50, 50), Color.White);
+                    spriteBatch.Draw(heartTexture, new Rectangle(graphics.PreferredBackBufferWidth - start, graphics.PreferredBackBufferHeight - 50, 50, 50), Color.White);
                     start += 50;
                 }
             }

@@ -35,7 +35,7 @@ namespace DeathOrDodge
     {
         OnGround,
         Jumping,
-        DoubleJumping,
+        Hit,
         Falling
     }
     /// <summary>
@@ -134,11 +134,21 @@ namespace DeathOrDodge
                         verticalState = VerticalMovementState.OnGround;
                     }
                     break;
+                case VerticalMovementState.Hit:
+                    jumpTimer += gameTime.ElapsedGameTime;
+                    // Simple jumping with platformer physics
+                    Position.Y -= (350 / (float)jumpTimer.TotalMilliseconds);
+                    if (jumpTimer.TotalMilliseconds >= JUMP_TIME)
+                        verticalState = VerticalMovementState.Falling;
+                    break;
             }
 
-
-            // Horizontal movement
-            if (keyboard.IsKeyDown(Keys.Left))
+            if(verticalState == VerticalMovementState.Hit)
+            {
+                Position.X -= 100 * delta;
+                animationState = PlayerAnimState.JumpingLeft;
+            }
+            else if (keyboard.IsKeyDown(Keys.Left))
             {
                 if (verticalState == VerticalMovementState.Jumping || verticalState == VerticalMovementState.Falling)
                     animationState = PlayerAnimState.JumpingLeft;
@@ -219,6 +229,13 @@ namespace DeathOrDodge
 
             frame %= 4;
             oldState = keyboard;
+        }
+
+        public void Hit()
+        {
+           // verticalState = VerticalMovementState.Hit;
+           // jumpTimer = TimeSpan.Zero;
+           // Position -= new Vector2(-10, 10);
         }
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
