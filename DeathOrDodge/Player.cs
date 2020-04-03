@@ -1,5 +1,6 @@
 ﻿/* Game: DeathOrDodge
- * 
+ * Author: Nathan Bean
+ * Modified by Bethany Weddle
  * */
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;

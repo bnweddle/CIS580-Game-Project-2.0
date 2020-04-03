@@ -15,6 +15,7 @@ namespace DeathOrDodge
         SpriteFont font;
 
         Player player;
+        Bush bush;
 
         // To see if Mute/Spacebar was pressed 
         KeyboardState newState;
@@ -23,7 +24,6 @@ namespace DeathOrDodge
         //To keep track of lives and levels
         Texture2D heart;
         int lives;
-        int levels;
 
         // Whether the game is over or has started
         bool beginGame;
@@ -37,7 +37,6 @@ namespace DeathOrDodge
         Texture2D backgroundStart;
         Texture2D backgroundEnd;
 
-        int kickCount;
         bool mute = false;
 
         public Game1()
@@ -45,6 +44,7 @@ namespace DeathOrDodge
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             player = new Player(this);
+            bush = new Bush(this);
         }
 
         /// <summary>
@@ -83,6 +83,9 @@ namespace DeathOrDodge
             loseLife = Content.Load<SoundEffect>("lose_life");
             gameOver = Content.Load<SoundEffect>("game_over");
             player.LoadContent(Content);
+            bush.LoadContent(Content);
+
+
             font = Content.Load<SpriteFont>("DefaultFont");
             heart = Content.Load<Texture2D>("heart");
             // The image before starting the game
@@ -120,9 +123,10 @@ namespace DeathOrDodge
             }
 
             player.Update(gameTime);
+            bush.Update(gameTime);
 
             
-            /* Need to change for Obstacles
+            /* Need to change for Obstacles/Bush
             if (CollisionDetected(paddle.Bounds, ball.Bounds))
             {
                 lives--;
@@ -189,6 +193,7 @@ namespace DeathOrDodge
             else
             {
                 player.Draw(spriteBatch);
+                bush.Draw(spriteBatch);
 
                 if (mute == false)
                 {
