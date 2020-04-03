@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DeathOrDodge
 {
-    public class Bush
+    public class Bush : ISprite
     {
         /// <summary>
         /// Texture holding the bush obstacle image
@@ -20,41 +20,47 @@ namespace DeathOrDodge
         /// <summary>
         /// The portion of the spritesheet that is the helicopter
         /// </summary>
-        BoundingRectangle Bounds = new BoundingRectangle
+        public BoundingRectangle Bounds = new BoundingRectangle
         {
             X = 0,
             Y = 0,
             Width = 150,
-            Height = 68
+            Height = 67
         };
 
-        float Scale { get; set; } = 1.0f;
+        /// <summary>
+        /// Scaling factor for the bush
+        /// </summary>
+        public float Scale = 0.70f;
 
         /// <summary>
         /// The bush's position in the world
         /// </summary>
-        public Vector2 Position { get; set; }
+        Vector2 Position;
 
-        /// <summary>
-        /// How fast the bush moves
-        /// </summary>
-        public float Speed { get; set; } = 100;
 
         Game1 game;
 
         /// <summary>
-        /// Constructs a player
+        /// Constructs a bush
         /// </summary>
         /// <param name="spritesheet">The player's spritesheet</param>
-        public Bush(Game1 game)
+        public Bush(Game1 game, Texture2D texture, Vector2 position)
         {
             this.game = game;
-            this.Position = new Vector2(1000, 525);
+            this.bush = texture;
+            this.Position = position;
         }
 
-        public void LoadContent(ContentManager content)
+        /// <summary>
+        /// Constructs a bush
+        /// </summary>
+        /// <param name="spritesheet">The player's spritesheet</param>
+        public Bush(Game1 game, Texture2D texture)
         {
-            bush = content.Load<Texture2D>("bush");
+            this.game = game;
+            this.bush = texture;
+            Position = new Vector2(300, 543);
         }
 
         /// <summary>
@@ -63,18 +69,19 @@ namespace DeathOrDodge
         /// <param name="gameTime">The GameTime object</param>
         public void Update(GameTime gameTime)
         {
-            Vector2 direction = Vector2.Zero;
-            direction.X -= 1;
-
-            //Move the bush
-            Position += (float)gameTime.ElapsedGameTime.TotalSeconds * Speed * direction;
+            //check if fallen off screen then reset
+            //layer has update  
+            if (Position.X < 0)
+            {
+                Position.X = 1300;
+            }
         }
 
         /// <summary>
         /// Draws the player sprite
         /// </summary>
         /// <param name="spriteBatch"></param>
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             spriteBatch.Draw(bush, Position, Bounds, Color.White, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0);
         }

@@ -50,7 +50,7 @@ namespace DeathOrDodge
         Idle = 4
     }
 
-    public class Player
+    public class Player : ISprite
     {
         // how much the animation moves per frames 
         const int FRAME_RATE = 124;
@@ -84,9 +84,10 @@ namespace DeathOrDodge
         KeyboardState oldState;
         int frame;
 
-        public Player(Game1 game)
+        public Player(Game1 game,Texture2D texture)
         {
             this.game = game;
+            player = texture;
         }
 
         public void Initialize()
@@ -97,11 +98,6 @@ namespace DeathOrDodge
             verticalState = VerticalMovementState.OnGround;
             Bounds.Width = FRAME_WIDTH;
             Bounds.Height = FRAME_HEIGHT;
-        }
-
-        public void LoadContent(ContentManager content)
-        {
-            player = content.Load<Texture2D>("newPlayer");
         }
 
         public void Update(GameTime gameTime)
@@ -243,7 +239,7 @@ namespace DeathOrDodge
             oldState = keyboard;
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
 
             Rectangle rectSource = new Rectangle(

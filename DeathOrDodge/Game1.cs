@@ -2,6 +2,8 @@
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Collections.Generic;
 
 namespace DeathOrDodge
 {
@@ -15,7 +17,7 @@ namespace DeathOrDodge
         SpriteFont font;
 
         Player player;
-        Bush bush;
+        List<Bush> bushes = new List<Bush>();
 
         // To see if Mute/Spacebar was pressed 
         KeyboardState newState;
@@ -28,6 +30,8 @@ namespace DeathOrDodge
         // Whether the game is over or has started
         bool beginGame;
         bool endGame;
+
+        Random random = new Random();
 
         // Sound effects for losing lives, hitting paddle, ending game;
         SoundEffect loseLife;
@@ -43,8 +47,6 @@ namespace DeathOrDodge
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            player = new Player(this);
-            bush = new Bush(this);
         }
 
         /// <summary>
@@ -58,13 +60,9 @@ namespace DeathOrDodge
             // TODO: Add your initialization logic here
             graphics.PreferredBackBufferWidth = 1042;
             graphics.PreferredBackBufferHeight = 768;
-
-            player.Initialize();
             graphics.ApplyChanges();
 
-
             lives = 5;
-
             // Keep track of the game starting and ending
             endGame = false;
             beginGame = false;
@@ -82,16 +80,49 @@ namespace DeathOrDodge
             spriteBatch = new SpriteBatch(GraphicsDevice);
             loseLife = Content.Load<SoundEffect>("lose_life");
             gameOver = Content.Load<SoundEffect>("game_over");
-            player.LoadContent(Content);
-            bush.LoadContent(Content);
-
+            var playerSheet = Content.Load<Texture2D>("newPlayer");
+            var bushSheet = Content.Load<Texture2D>("bush");
+            
+            //foreach random if good spot contine else generate new spot
 
             font = Content.Load<SpriteFont>("DefaultFont");
             heart = Content.Load<Texture2D>("heart");
             // The image before starting the game
             backgroundStart = Content.Load<Texture2D>("start");
             backgroundEnd = Content.Load<Texture2D>("end");
+
             // TODO: use this.Content to load your game content here
+
+            var bluesky = Content.Load<Texture2D>("bluesky");
+            var blueskySprite = new StaticSprite(bluesky);
+            var backgroundLayer = new ParallaxLayer(this);
+            backgroundLayer.Sprites.Add(blueskySprite);
+            backgroundLayer.DrawOrder = 0;
+            Components.Add(backgroundLayer);
+
+            player = new Player(this, playerSheet);
+            player.Initialize();
+            var playerLayer = new ParallaxLayer(this);
+            playerLayer.Sprites.Add(player);
+            playerLayer.DrawOrder = 2;
+            Components.Add(playerLayer);
+
+            var bushLayer = new ParallaxLayer(this);
+
+            float offset = 150;
+            for (int i = 0; i < 10; i++)
+            {
+               
+                Bush bush = new Bush(this, bushSheet, new Vector2(300 + offset, 543));
+                bushLayer.Sprites.Add(bush);
+                bushes.Add(bush);
+                bushLayer.DrawOrder = 3;
+                offset += random.Next(150, 300);
+            }
+            Components.Add(bushLayer);
+
+
+
         }
 
         /// <summary>
@@ -123,11 +154,10 @@ namespace DeathOrDodge
             }
 
             player.Update(gameTime);
-            bush.Update(gameTime);
-
-            
-            /* Need to change for Obstacles/Bush
-            if (CollisionDetected(paddle.Bounds, ball.Bounds))
+           // bush.Update(gameTime);
+           
+           /*
+           if (player.Bounds.CollidesWith(bush.Bounds))
             {
                 lives--;
                 if (lives > 0)
@@ -137,30 +167,7 @@ namespace DeathOrDodge
                     gameOver.Play();
                     endGame = true;
                 }
-
-                ball.Velocity.X *= -1;
-                var bounce = (paddle.Bounds.X + paddle.Bounds.Width) - (ball.Bounds.X - ball.Bounds.Radius);
-                ball.Bounds.X += 2 * bounce;
-                if (levels == 2)
-                {
-                    ball.Velocity.X += 0.25f;
-                }
-                if (levels == 3)
-                {
-                    //increase goal and speed
-                    ball.Velocity.X += 0.25f;
-                    paddle.Bounds.Height += 10;
-                }
-            }
-
-            if (CollisionDetected(player.Bounds, ball.Bounds))
-            {
-                kickCount++;
-                paddleHit.Play();
-                ball.Velocity.X *= -1;
-                var bounce = (player.Bounds.X + player.Bounds.Width) - (ball.Bounds.X - ball.Bounds.Radius);
-                ball.Bounds.X += 2 * bounce;
-            } */
+            }*/
 
             oldState = newState;
             base.Update(gameTime);
@@ -192,8 +199,6 @@ namespace DeathOrDodge
             }
             else
             {
-                player.Draw(spriteBatch);
-                bush.Draw(spriteBatch);
 
                 if (mute == false)
                 {
