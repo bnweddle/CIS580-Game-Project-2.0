@@ -151,7 +151,7 @@ namespace DeathOrDodge
             mountainsLayer.DrawOrder = 1;
 
             var groundSprites = new List<StaticSprite>();
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 5; i++)
             {
                 var position = new Vector2(i * 2216, 435);
                 var sprite = new StaticSprite(ground, position, 0.25f);
@@ -205,12 +205,12 @@ namespace DeathOrDodge
             }
 
             player.Update(gameTime);
-            Rectangle playerRect = new Rectangle((int)player.Bounds.X, (int)player.Bounds.Y, (int)player.Bounds.Width, (int)player.Bounds.Height);
-
+        
             foreach (Bush b in bushes){
 
+                var bb = new BoundingRectangle(b.Position, b.Bounds.Width, b.Bounds.Height);
                 b.Update(gameTime);
-                if (playerRect.Intersects(b.source))
+                if (player.Bounds.CollidesWith(bb))
                 {
                     player.Hit();
                     lives--;
@@ -219,7 +219,6 @@ namespace DeathOrDodge
                     else if (lives == 0)
                     {
                         gameOver.Play();
-                        endGame = true;
                     }
                 }
             }

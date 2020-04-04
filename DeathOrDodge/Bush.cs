@@ -15,11 +15,9 @@ namespace DeathOrDodge
         /// <summary>
         /// Texture holding the bush obstacle image
         /// </summary>
-        Texture2D bush;
+        public Texture2D bush;
 
-        private Player player;
-
-        
+        private Player player;  
 
         /// <summary>
         /// The portion of the spritesheet that is the helicopter
@@ -58,7 +56,7 @@ namespace DeathOrDodge
             Bounds.X = position.X;
             Bounds.Y = position.Y;
             this.player = player;
-            source = new Rectangle((int)Position.X, (int)Position.Y, (int)(texture.Width * 0.60f), (int)(texture.Height * 0.60f));
+            
         }
 
         /// <summary>
@@ -67,14 +65,16 @@ namespace DeathOrDodge
         /// <param name="gameTime">The GameTime object</param>
         public void Update(GameTime gameTime)
         {
-           if(player.Position.X - Position.X > 250)
-           {
+            if (player.Position.X - Position.X > 250)
+            {
                 System.Diagnostics.Debug.WriteLine($"moving bush from {Position.X} moving bush to {bush.Bounds.X}");
 
                 Position += new Vector2(3000, 0);
                 Bounds.X = Position.X;
 
+
                 System.Diagnostics.Debug.WriteLine($"moving bush to {Position.X} moving bush to {bush.Bounds.X}");
+
 
             }
 
