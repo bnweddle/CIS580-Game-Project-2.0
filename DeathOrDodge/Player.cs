@@ -57,7 +57,7 @@ namespace DeathOrDodge
         // The duration of a player's jump, in milliseconds
         const int JUMP_TIME = 500;
         // the speed of the player
-        const float PLAYER_SPEED = 100;
+        const float PLAYER_SPEED = 200;
         // width of animation frames
         public const int FRAME_WIDTH = 67;
         // height of animation frames
@@ -108,6 +108,11 @@ namespace DeathOrDodge
             Bounds.X = Position.X;
             Bounds.Y = Position.Y;
 
+            if (Position.X < 250)
+            {
+                Position.X = 250;
+            }
+
             // Vertical movement
             switch (verticalState)
             {
@@ -121,7 +126,7 @@ namespace DeathOrDodge
                 case VerticalMovementState.Jumping:
                     jumpTimer += gameTime.ElapsedGameTime;
                     // Simple jumping with platformer physics
-                    Position.Y -= (350 / (float)jumpTimer.TotalMilliseconds);
+                    Position.Y -= (600 / (float)jumpTimer.TotalMilliseconds);
                     if (jumpTimer.TotalMilliseconds >= JUMP_TIME)
                         verticalState = VerticalMovementState.Falling;
                     break;
@@ -233,9 +238,9 @@ namespace DeathOrDodge
 
         public void Hit()
         {
-           // verticalState = VerticalMovementState.Hit;
-           // jumpTimer = TimeSpan.Zero;
-           // Position -= new Vector2(-10, 10);
+           verticalState = VerticalMovementState.Hit;
+           jumpTimer = TimeSpan.Zero;
+           Position -= new Vector2(-10, 70);
         }
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)

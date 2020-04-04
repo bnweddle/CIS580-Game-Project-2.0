@@ -19,6 +19,8 @@ namespace DeathOrDodge
 
         private Player player;
 
+        
+
         /// <summary>
         /// The portion of the spritesheet that is the helicopter
         /// </summary>
@@ -26,19 +28,21 @@ namespace DeathOrDodge
         {
             X = 0,
             Y = 0,
-            Width = 150,
+            Width = 70,
             Height = 67
-        };
+        }; 
 
         /// <summary>
         /// Scaling factor for the bush
         /// </summary>
-        public float Scale = 0.70f;
+        public float Scale = 0.60f;
 
         /// <summary>
         /// The bush's position in the world
         /// </summary>
-        Vector2 Position;
+        public Vector2 Position;
+
+        public Rectangle source;
 
         Game1 game;
 
@@ -54,17 +58,7 @@ namespace DeathOrDodge
             Bounds.X = position.X;
             Bounds.Y = position.Y;
             this.player = player;
-        }
-
-        /// <summary>
-        /// Constructs a bush
-        /// </summary>
-        /// <param name="spritesheet">The player's spritesheet</param>
-        public Bush(Game1 game, Texture2D texture)
-        {
-            this.game = game;
-            this.bush = texture;
-            Position = new Vector2(300, 543);
+            source = new Rectangle((int)Position.X, (int)Position.Y, (int)(texture.Width * 0.60f), (int)(texture.Height * 0.60f));
         }
 
         /// <summary>

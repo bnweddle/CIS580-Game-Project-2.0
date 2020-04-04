@@ -118,7 +118,7 @@ namespace DeathOrDodge
 
             bushLayer = new ParallaxLayer(this);
 
-            float offset = 150;
+            float offset = 200;
             for (int i = 0; i < 10; i++)
             {
                
@@ -126,7 +126,7 @@ namespace DeathOrDodge
                 bushLayer.Sprites.Add(bush);
                 bushes.Add(bush);
                 bushLayer.DrawOrder = 4;
-                offset += random.Next(150, 300);
+                offset += random.Next(200, 300);
             }
 
             Components.Add(bushLayer);
@@ -205,11 +205,12 @@ namespace DeathOrDodge
             }
 
             player.Update(gameTime);
+            Rectangle playerRect = new Rectangle((int)player.Bounds.X, (int)player.Bounds.Y, (int)player.Bounds.Width, (int)player.Bounds.Height);
 
             foreach (Bush b in bushes){
 
                 b.Update(gameTime);
-                if (player.Bounds.CollidesWith(b.Bounds))
+                if (playerRect.Intersects(b.source))
                 {
                     player.Hit();
                     lives--;
