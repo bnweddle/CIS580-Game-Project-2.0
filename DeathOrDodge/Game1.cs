@@ -119,7 +119,7 @@ namespace DeathOrDodge
             var mountainSprites = new List<StaticSprite>();
             for (int i = 0; i < mountainsTextures.Count; i++)
             {
-                var position = new Vector2(i * 1448, 100);
+                var position = new Vector2(i * 1447, 100);
                 var sprite = new StaticSprite(mountainsTextures[i], position, 0.25f);
                 mountainSprites.Add(sprite);
             }
