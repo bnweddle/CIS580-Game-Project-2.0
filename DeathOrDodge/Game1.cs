@@ -87,14 +87,6 @@ namespace DeathOrDodge
             gameOver = Content.Load<SoundEffect>("game_over");
             var playerSheet = Content.Load<Texture2D>("newPlayer");
             var bushSheet = Content.Load<Texture2D>("bush");
-            
-            //foreach random if good spot contine else generate new spot
-
-            font = Content.Load<SpriteFont>("DefaultFont");
-            heartTexture = Content.Load<Texture2D>("heart");
-            // The image before starting the game
-            backgroundStart = Content.Load<Texture2D>("start");
-            backgroundEnd = Content.Load<Texture2D>("end");
 
             // TODO: use this.Content to load your game content here
 
@@ -195,13 +187,19 @@ namespace DeathOrDodge
 
             newState = Keyboard.GetState();
 
-            BeginGame();
             // Why do I have to hit spacebar twice?
             MuteSound(newState, oldState);
 
             if (newState.IsKeyDown(Keys.Escape))
             {
                 Exit();
+            }
+
+            if(newState.IsKeyDown(Keys.Enter))
+            {
+                player.Restart();
+                mute = false;
+                lives = 5;
             }
 
             player.Update(gameTime);
@@ -219,6 +217,8 @@ namespace DeathOrDodge
                     else if (lives == 0)
                     {
                         gameOver.Play();
+                        player.Dead();
+                        break;
                     }
                 }
             }
@@ -238,77 +238,9 @@ namespace DeathOrDodge
             // TODO: Add your drawing code here
             spriteBatch.Begin();
 
-            if (!beginGame)
-            {
-                // Fill the screen with black before the game starts
-                spriteBatch.Draw(backgroundStart, new Rectangle(0, 0,
-                (int)graphics.PreferredBackBufferWidth, (int)graphics.PreferredBackBufferHeight), Color.White);
-
-            }
-            else if (lives <= 0)
-            {
-                spriteBatch.Draw(backgroundEnd, new Rectangle(0, 0,
-                (int)graphics.PreferredBackBufferWidth, (int)graphics.PreferredBackBufferHeight), Color.White);
-                endGame = true;
-            }
-            else
-            {
-
-                if (mute == false)
-                {
-                    spriteBatch.DrawString(font, "Press SPACE to mute", new Vector2(425, 0), Color.White);
-                }
-                if (mute == true)
-                {
-                    spriteBatch.DrawString(font, "Press SPACE to unmute", new Vector2(420, 0), Color.White);
-                }
-
-                int start = 50;
-                for (int i = 0; i < lives; i++)
-                {
-                    spriteBatch.Draw(heartTexture, new Rectangle(graphics.PreferredBackBufferWidth - start, graphics.PreferredBackBufferHeight - 50, 50, 50), Color.White);
-                    start += 50;
-                }
-            }
-
             spriteBatch.End();
             base.Draw(gameTime);
         }
-
-        void BeginGame()
-        {
-            // Got general idea for outline of code from 
-            // https://docs.microsoft.com/en-us/windows/uwp/get-started/get-started-tutorial-game-mg2d
-            KeyboardState keyboardState = Keyboard.GetState();
-
-            // Quit the game if Escape is pressed.
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || keyboardState.IsKeyDown(Keys.Escape))
-                Exit();
-
-            // Start the game if Space is pressed.
-            // Exit the keyboard handler method early, preventing the dino from jumping on the same keypress.
-            if (!beginGame)
-            {
-                if (keyboardState.IsKeyDown(Keys.Space))
-                {
-                    endGame = false;
-                    beginGame = true;
-                }
-            }
-
-            // Restart the game if Enter is pressed
-            if (endGame)
-            {
-                if (keyboardState.IsKeyDown(Keys.Enter))
-                {
-                    lives = 5;
-                    endGame = false;
-                    mute = false;
-                    SoundEffect.MasterVolume = 1.0f;
-                }
-            }
-        }
-
 
         public void MuteSound(KeyboardState newS, KeyboardState oldS)
         {

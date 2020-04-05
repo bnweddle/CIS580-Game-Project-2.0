@@ -31,12 +31,14 @@ namespace DeathOrDodge
     /// <summary>
     /// An enumeration of possible player veritcal movement states
     /// </summary>
-    enum VerticalMovementState
+    public enum VerticalMovementState
     {
         OnGround,
         Jumping,
+        Falling,
         Hit,
-        Falling
+        Dead,
+        Restart
     }
     /// <summary>
     /// For which direction the player is facing
@@ -57,7 +59,7 @@ namespace DeathOrDodge
         // The duration of a player's jump, in milliseconds
         const int JUMP_TIME = 500;
         // the speed of the player
-        const float PLAYER_SPEED = 200;
+        public const float PLAYER_SPEED = 200;
         // width of animation frames
         public const int FRAME_WIDTH = 67;
         // height of animation frames
@@ -234,6 +236,23 @@ namespace DeathOrDodge
 
             frame %= 4;
             oldState = keyboard;
+        }
+
+        public void Restart()
+        {
+            verticalState = VerticalMovementState.Restart;
+            Initialize();
+        }
+
+        public void Dead()
+        {
+            verticalState = VerticalMovementState.Dead;
+            Position.Y += 100 * PLAYER_SPEED;
+            // TODO: This needs to be replaced with collision logic
+            if (Position.Y > 1000)
+            {
+                Position.Y = 1000;
+            }
         }
 
         public void Hit()
