@@ -14,10 +14,10 @@ namespace DeathOrDodge
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        SpriteFont font;
 
         Player player;
         List<Bush> bushes = new List<Bush>();
+        Random random = new Random();
 
         // To see if Mute/Spacebar was pressed 
         KeyboardState newState;
@@ -25,22 +25,10 @@ namespace DeathOrDodge
 
         //To keep track of lives and levels
         int lives;
-        Texture2D heartTexture;
-
-        // Whether the game is over or has started
-        bool beginGame;
-        bool endGame;
-
-        Random random = new Random();
 
         // Sound effects for losing lives, hitting paddle, ending game;
         SoundEffect loseLife;
         SoundEffect gameOver;
-
-        // For background start and end page
-        Texture2D backgroundStart;
-        Texture2D backgroundEnd;
-
 
         ParallaxLayer playerLayer;
         ParallaxLayer backgroundLayer;
@@ -68,10 +56,6 @@ namespace DeathOrDodge
             graphics.ApplyChanges();
 
             lives = 5;
-            // Keep track of the game starting and ending
-            endGame = false;
-            beginGame = false;
-
             base.Initialize();
         }
 
@@ -123,14 +107,20 @@ namespace DeathOrDodge
 
             Components.Add(bushLayer);
 
-            var mountains = Content.Load<Texture2D>("mountains");
             var ground = Content.Load<Texture2D>("ground");
+            var mountainsTextures = new List<Texture2D>()
+            {
+                Content.Load<Texture2D>("mountains"),
+                Content.Load<Texture2D>("mountains2"),
+                Content.Load<Texture2D>("mountains"),
+                Content.Load<Texture2D>("mountains2")
+            };
 
             var mountainSprites = new List<StaticSprite>();
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < mountainsTextures.Count; i++)
             {
-                var position = new Vector2(i * 1750, 100);
-                var sprite = new StaticSprite(mountains, position, 0.25f);
+                var position = new Vector2(i * 1448, 100);
+                var sprite = new StaticSprite(mountainsTextures[i], position, 0.25f);
                 mountainSprites.Add(sprite);
             }
 
@@ -195,18 +185,11 @@ namespace DeathOrDodge
                 Exit();
             }
 
-            if(newState.IsKeyDown(Keys.Enter))
-            {
-                player.Restart();
-                mute = false;
-                lives = 5;
-            }
-
             player.Update(gameTime);
-        
+
             foreach (Bush b in bushes){
 
-                var bb = new BoundingRectangle(b.Position, b.Bounds.Width, b.Bounds.Height);
+                var bb = new BoundingRectangle(b.Position.X, b.Position.Y, b.Bounds.Width, b.Bounds.Height);
                 b.Update(gameTime);
                 if (player.Bounds.CollidesWith(bb))
                 {
@@ -218,11 +201,19 @@ namespace DeathOrDodge
                     {
                         gameOver.Play();
                         player.Dead();
+                        mute = true;
                         break;
                     }
                 }
             }
-         
+
+            if (newState.IsKeyDown(Keys.Enter))
+            {
+                player.Restart();
+                mute = false;
+                lives = 5;
+            }
+
             oldState = newState;
             base.Update(gameTime);
         }

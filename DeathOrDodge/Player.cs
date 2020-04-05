@@ -240,7 +240,6 @@ namespace DeathOrDodge
 
         public void Restart()
         {
-            verticalState = VerticalMovementState.Restart;
             Initialize();
         }
 
