@@ -241,7 +241,7 @@ namespace DeathOrDodge
                         endGame = true;
                         LoadContent();
                         gameOver.Play();
-                        player.Dead();
+                        // player.Dead();
                         mute = true;
                         break;
                     }
@@ -253,7 +253,7 @@ namespace DeathOrDodge
             {
 
                 Components.Remove(gameLayer);
-                player.Restart();
+                //player.Restart();
                 mute = false;
                 lives = 5;
             }
