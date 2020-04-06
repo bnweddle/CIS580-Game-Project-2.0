@@ -33,8 +33,12 @@ namespace DeathOrDodge
         ParallaxLayer playerLayer;
         ParallaxLayer backgroundLayer;
         ParallaxLayer bushLayer;
+        ParallaxLayer gameLayer;
+
+        StaticSprite[] gameSprites;
 
         bool mute = false;
+        bool endGame = false;
 
         public Game1()
         {
@@ -51,7 +55,7 @@ namespace DeathOrDodge
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            graphics.PreferredBackBufferWidth = 1042;
+            graphics.PreferredBackBufferWidth = 1020;
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
 
@@ -74,87 +78,115 @@ namespace DeathOrDodge
 
             // TODO: use this.Content to load your game content here
 
-            var bluesky = Content.Load<Texture2D>("bluesky");
-            var blueskySprites = new StaticSprite[]
+            if(endGame == false)
             {
+                var bluesky = Content.Load<Texture2D>("bluesky");
+                var blueskySprites = new StaticSprite[]
+                {
                     new StaticSprite(bluesky, 1.0f),
                     new StaticSprite(bluesky, new Vector2(1968, 0), 1.0f)
-            };
-            backgroundLayer = new ParallaxLayer(this);
-            backgroundLayer.Sprites.AddRange(blueskySprites);
-            backgroundLayer.DrawOrder = 0;
-            Components.Add(backgroundLayer);
+                };
+                backgroundLayer = new ParallaxLayer(this);
+                backgroundLayer.Sprites.AddRange(blueskySprites);
+                backgroundLayer.DrawOrder = 1;
+                Components.Add(backgroundLayer);
 
-            player = new Player(this, playerSheet);
-            player.Initialize();
-            playerLayer = new ParallaxLayer(this);
-            playerLayer.Sprites.Add(player);
-            playerLayer.DrawOrder = 3;
-            Components.Add(playerLayer);
+                var gameTextures = new List<Texture2D>()
+                {
+                    Content.Load<Texture2D>("start"),
+                    Content.Load<Texture2D>("end"),
+                };
 
-            bushLayer = new ParallaxLayer(this);
+                gameSprites = new StaticSprite[]
+                {
+                    new StaticSprite(gameTextures[0], 1.0f),
+                    new StaticSprite(gameTextures[1], 1.0f)
+                };
 
-            float offset = 200;
-            for (int i = 0; i < 10; i++)
-            {
-               
-                Bush bush = new Bush(this, bushSheet, new Vector2(300 + offset, 543), player);
-                bushLayer.Sprites.Add(bush);
-                bushes.Add(bush);
-                bushLayer.DrawOrder = 4;
-                offset += random.Next(200, 300);
+                gameLayer = new ParallaxLayer(this);
+                gameLayer.Sprites.Add(gameSprites[0]);
+                gameLayer.DrawOrder = 5;
+                Components.Add(gameLayer);
+
+                player = new Player(this, playerSheet);
+                player.Initialize();
+                playerLayer = new ParallaxLayer(this);
+                playerLayer.Sprites.Add(player);
+                playerLayer.DrawOrder = 3;
+                Components.Add(playerLayer);
+
+                bushLayer = new ParallaxLayer(this);
+
+                float offset = 200;
+                for (int i = 0; i < 10; i++)
+                {
+
+                    Bush bush = new Bush(this, bushSheet, new Vector2(300 + offset, 543), player);
+                    bushLayer.Sprites.Add(bush);
+                    bushes.Add(bush);
+                    bushLayer.DrawOrder = 4;
+                    offset += random.Next(200, 300);
+                }
+
+                Components.Add(bushLayer);
+
+                var ground = Content.Load<Texture2D>("ground");
+                var mountainsTextures = new List<Texture2D>()
+                {
+                    Content.Load<Texture2D>("mountains"),
+                    Content.Load<Texture2D>("mountains2"),
+                    Content.Load<Texture2D>("mountains"),
+                    Content.Load<Texture2D>("mountains2")
+                };
+
+                var mountainSprites = new List<StaticSprite>();
+                for (int i = 0; i < mountainsTextures.Count; i++)
+                {
+                    var position = new Vector2(i * 1447, 100);
+                    var sprite = new StaticSprite(mountainsTextures[i], position, 0.25f);
+                    mountainSprites.Add(sprite);
+                }
+
+                var mountainsLayer = new ParallaxLayer(this);
+                foreach (var sprite in mountainSprites)
+                {
+                    mountainsLayer.Sprites.Add(sprite);
+                }
+
+                mountainsLayer.DrawOrder = 1;
+
+                var groundSprites = new List<StaticSprite>();
+                for (int i = 0; i < 5; i++)
+                {
+                    var position = new Vector2(i * 2216, 435);
+                    var sprite = new StaticSprite(ground, position, 0.25f);
+                    groundSprites.Add(sprite);
+                }
+
+                var groundLayer = new ParallaxLayer(this);
+                foreach (var sprite in groundSprites)
+                {
+                    groundLayer.Sprites.Add(sprite);
+                }
+
+                groundLayer.DrawOrder = 2;
+
+                Components.Add(mountainsLayer);
+                Components.Add(groundLayer);
+
+                gameLayer.ScrollController = new PlayerTrackingScrollController(player, 0.0f);
+                mountainsLayer.ScrollController = new PlayerTrackingScrollController(player, 0.4f);
+                playerLayer.ScrollController = new PlayerTrackingScrollController(player, 1.0f);
+                groundLayer.ScrollController = new PlayerTrackingScrollController(player, 1.0f);
+                bushLayer.ScrollController = new PlayerTrackingScrollController(player, 1.0f);
+
             }
-
-            Components.Add(bushLayer);
-
-            var ground = Content.Load<Texture2D>("ground");
-            var mountainsTextures = new List<Texture2D>()
+            else
             {
-                Content.Load<Texture2D>("mountains"),
-                Content.Load<Texture2D>("mountains2"),
-                Content.Load<Texture2D>("mountains"),
-                Content.Load<Texture2D>("mountains2")
-            };
-
-            var mountainSprites = new List<StaticSprite>();
-            for (int i = 0; i < mountainsTextures.Count; i++)
-            {
-                var position = new Vector2(i * 1447, 100);
-                var sprite = new StaticSprite(mountainsTextures[i], position, 0.25f);
-                mountainSprites.Add(sprite);
+                gameLayer.Sprites.Add(gameSprites[1]);
+                gameLayer.DrawOrder = 5;
+                Components.Add(gameLayer);
             }
-
-            var mountainsLayer = new ParallaxLayer(this);
-            foreach (var sprite in mountainSprites)
-            {
-                mountainsLayer.Sprites.Add(sprite);
-            }
-
-            mountainsLayer.DrawOrder = 1;
-
-            var groundSprites = new List<StaticSprite>();
-            for (int i = 0; i < 5; i++)
-            {
-                var position = new Vector2(i * 2216, 435);
-                var sprite = new StaticSprite(ground, position, 0.25f);
-                groundSprites.Add(sprite);
-            }
-
-            var groundLayer = new ParallaxLayer(this);
-            foreach (var sprite in groundSprites)
-            {
-                groundLayer.Sprites.Add(sprite);
-            }
-
-            groundLayer.DrawOrder = 2;
-
-            Components.Add(mountainsLayer);
-            Components.Add(groundLayer);
-
-            mountainsLayer.ScrollController = new PlayerTrackingScrollController(player, 0.4f);
-            playerLayer.ScrollController = new PlayerTrackingScrollController(player, 1.0f);
-            groundLayer.ScrollController = new PlayerTrackingScrollController(player, 1.0f);
-            bushLayer.ScrollController = new PlayerTrackingScrollController(player, 1.0f);
 
         }
 
@@ -185,6 +217,13 @@ namespace DeathOrDodge
                 Exit();
             }
 
+            if (newState.IsKeyDown(Keys.Space))
+            {
+                gameLayer.DrawOrder = 0;
+                Components.Remove(gameLayer);
+            }
+            
+
             player.Update(gameTime);
 
             foreach (Bush b in bushes){
@@ -199,6 +238,8 @@ namespace DeathOrDodge
                         loseLife.Play();
                     else if (lives == 0)
                     {
+                        endGame = true;
+                        LoadContent();
                         gameOver.Play();
                         player.Dead();
                         mute = true;
@@ -207,8 +248,11 @@ namespace DeathOrDodge
                 }
             }
 
+            
             if (newState.IsKeyDown(Keys.Enter))
             {
+
+                Components.Remove(gameLayer);
                 player.Restart();
                 mute = false;
                 lives = 5;
